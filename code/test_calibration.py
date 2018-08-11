@@ -1,11 +1,11 @@
-import main
+import calibration
 import pytest
 
-class Main():
+class TestCalibration():
 
     @classmethod
     def setup_class(self):
-        self.m = main.Main()
+        self.c = calibration.Calibration()
 
     @classmethod
     def teardown_class(self):
@@ -13,5 +13,5 @@ class Main():
 
     #@pytest.mark.skip(reason="Not Yet Passed.")
     def test_start(self):
-        output = self.m.start()
+        output = self.c.start()
         assert output is True
