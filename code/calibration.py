@@ -97,7 +97,7 @@ class Calibration():
 
             imgRGB_right=cv2.cvtColor(self.rightFrame,cv2.COLOR_BGR2RGB)
             imgRGB_left=cv2.cvtColor(self.leftFrame,cv2.COLOR_BGR2RGB)
-            combined_image = np.concatenate((imgRGB_left, imgRGB_right), axis=1)
+            imgRGB_combined = np.concatenate((imgRGB_left, imgRGB_right), axis=1)
             jpg_image = Image.fromarray(imgRGB_combined)
 
             cv2.imshow('combined_image', jpg_image)
