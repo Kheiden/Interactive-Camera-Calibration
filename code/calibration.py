@@ -110,7 +110,10 @@ class Calibration():
             # TODO: Current problem is that the image does not show properly
             # when tested.
             cv2.imshow('combined_image', imgRGB_combined)
-            cv2.waitKey()
+            # Only need below to ensure the video stream happens.
+            # Loop will be controlled by self.end_thread
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
         right.release()
         left.release()
