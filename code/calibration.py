@@ -87,20 +87,26 @@ class Calibration():
             if self.end_thread == True:
                 print("Stopping threaded_camera_stream")
                 break
-            ret_left = right.grab()
-            ret_right = left.grab()
             #print("Taking photo...")
+            ret_right = right.grab()
+            ret_left = left.grab()
             self.wait_for_picture = True
             _, self.rightFrame = right.retrieve()
             _, self.leftFrame = left.retrieve()
             self.wait_for_picture = False
+            
+            if ret_left == False:
+                print("Problem with left")
+            if ret_right == False:
+                print("Problem with right")
+
 
             imgRGB_right=cv2.cvtColor(self.rightFrame,cv2.COLOR_BGR2RGB)
             imgRGB_left=cv2.cvtColor(self.leftFrame,cv2.COLOR_BGR2RGB)
             imgRGB_combined = np.concatenate((imgRGB_left, imgRGB_right), axis=1)
-            jpg_image = Image.fromarray(imgRGB_combined)
+            #jpg_image = Image.fromarray(imgRGB_combined)
 
-            cv2.imshow('combined_image', jpg_image)
+            cv2.imshow('combined_image', imgRGB_combined)
 
         right.release()
         left.release()
