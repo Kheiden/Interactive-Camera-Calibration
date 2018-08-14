@@ -65,7 +65,7 @@ class Calibration():
 
         return False
 
-    def threaded_camera_stream():
+    def threaded_camera_stream(self):
         res_x = 640
         res_y = 480
 
@@ -86,10 +86,10 @@ class Calibration():
                 break
             ret_left = right.grab()
             ret_right = left.grab()
+            print("Taking photo...")
             _, self.rightFrame = right.retrieve()
             _, self.leftFrame = left.retrieve()
             self.wait_for_picture = False
-
 
             combined_image = np.concatenate((self.leftFrame, self.rightFrame), axis=1)
             cv2.imshow('combined_image', combined_image)
@@ -303,4 +303,5 @@ class Calibration():
 
 
 if __name__ == '__main__':
-    start()
+    c = Calibration()
+    c.start()
