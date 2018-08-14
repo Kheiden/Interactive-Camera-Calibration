@@ -69,7 +69,7 @@ class Calibration():
                     if output != False:
                         break
                     #Remove last two images from glob
-                    images = glob.glob('{}/RPi-tankbot/local/frames/camera_*{}.jpg'.format(self.home_dir, right_or_left))
+                    images = glob.glob('{}/RPi-tankbot/local/frames/camera_*.jpg'.format(self.home_dir))
                     if len(images) == 0:
                         print("Take more chessboard images.")
                         break
