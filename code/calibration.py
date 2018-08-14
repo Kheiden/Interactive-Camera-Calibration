@@ -147,13 +147,14 @@ class Calibration():
         TERMINATION_CRITERIA = (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 30, 0.01)
         OPTIMIZE_ALPHA = 0.25
 
-        try:
-            npz_file = np.load('{}/calibration_data/{}p/stereo_camera_calibration.npz'.format(self.home_dir, res_y))
-            processing_time02 = cv2.getTickCount()
-            processing_time = (processing_time02 - processing_time01)/ cv2.getTickFrequency()
-            return processing_time
-        except:
-            pass
+        # TODO- Implement a cache for the stereopair calibration (if possible)
+        #try:
+        #    npz_file = np.load('{}/calibration_data/{}p/stereo_camera_calibration.npz'.format(self.home_dir, res_y))
+        #    processing_time02 = cv2.getTickCount()
+        #    processing_time = (processing_time02 - processing_time01)/ cv2.getTickFrequency()
+        #    return processing_time
+        #except:
+        #    pass
 
         for cam_num in [0, 1]:
             right_or_left = ["_right" if cam_num==1 else "_left"][0]
@@ -298,19 +299,24 @@ class Calibration():
         rvecs = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(N_OK)]
         tvecs = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(N_OK)]
 
-        rms, camera_matrix, distortion_coeff, _, _ = \
-            cv2.fisheye.calibrate(
-                objpoints,
-                imgpoints,
-                gray.shape[::-1],
-                K,
-                D,
-                rvecs,
-                tvecs,
-                calibration_flags,
-                (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6)
-            )
-
+        try:
+            rms, camera_matrix, distortion_coeff, _, _ = \
+                cv2.fisheye.calibrate(
+                    objpoints,
+                    imgpoints,
+                    gray.shape[::-1],
+                    K,
+                    D,
+                    rvecs,
+                    tvecs,
+                    calibration_flags,
+                    (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6)
+                )
+        except:
+            print("Camera calibration Failed")
+            processing_time02 = cv2.getTickCount()
+            processing_time = (processing_time02 - processing_time01)/ cv2.getTickFrequency()
+            return processing_time
         print("Root Means Squared:", rms)
 
         map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), K, DIM, cv2.CV_16SC2)
