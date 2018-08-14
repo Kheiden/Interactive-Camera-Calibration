@@ -83,11 +83,13 @@ class Calibration():
         left.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
 
         # First start the camera stream thread
+        counter = 0
         while True:
             if self.end_thread == True:
                 print("Stopping threaded_camera_stream")
                 break
-            #print("Taking photo...")
+            counter += 1
+            print("Taking photo number", counter)
             ret_right = right.grab()
             ret_left = left.grab()
             self.wait_for_picture = True
