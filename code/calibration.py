@@ -81,7 +81,7 @@ class Calibration():
 
         # First start the camera stream thread
         while True:
-            if self.end_thread == False:
+            if self.end_thread == True:
                 print("Stopping threaded_camera_stream")
                 break
             ret_left = right.grab()
