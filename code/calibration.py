@@ -63,7 +63,19 @@ class Calibration():
                 print("Calibrating right camera...")
                 self.calibrate_camera(cam_num=1, res_x=640, res_y=480)
                 print("Calibrating stereo camera pair...")
-                self.calibrate_stereo_cameras(res_x=640, res_y=480)
+                while True:
+                    print("Re-attempting to calibrate stereo camera pair...")
+                    output = self.calibrate_stereo_cameras(res_x=640, res_y=480)
+                    if output != False:
+                        break
+                    #Remove last two images from glob
+                    images = glob.glob('{}/RPi-tankbot/local/frames/camera_*{}.jpg'.format(self.home_dir, right_or_left))
+                    if len(images) == 0:
+                        print("Take more chessboard images.")
+                        break
+                    for filename in images[-2:]
+                        print("Deleting file:", filename)
+                        os.remove(filename)
                 continue
 
         return False
@@ -191,12 +203,16 @@ class Calibration():
         leftImagePoints = np.asarray(leftImagePoints, dtype=np.float64)
         rightImagePoints = np.asarray(rightImagePoints, dtype=np.float64)
 
-        (RMS, _, _, _, _, rotationMatrix, translationVector) = cv2.fisheye.stereoCalibrate(
-                objectPoints, leftImagePoints, rightImagePoints,
-                leftCameraMatrix, leftDistortionCoefficients,
-                rightCameraMatrix, rightDistortionCoefficients,
-                imageSize, None, None,
-                cv2.CALIB_FIX_INTRINSIC, TERMINATION_CRITERIA)
+        try:
+            (RMS, _, _, _, _, rotationMatrix, translationVector) = cv2.fisheye.stereoCalibrate(
+                    objectPoints, leftImagePoints, rightImagePoints,
+                    leftCameraMatrix, leftDistortionCoefficients,
+                    rightCameraMatrix, rightDistortionCoefficients,
+                    imageSize, None, None,
+                    cv2.CALIB_FIX_INTRINSIC, TERMINATION_CRITERIA)
+        except:
+            # Unable to calibrate stereo pair.
+            return False
 
         print("Root Means Squared:", RMS)
 
