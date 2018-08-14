@@ -1,14 +1,103 @@
+import time
+import glob
+import cv2
+import os
 
 class Calibration():
 
     def __init__(self):
-        return
+
+        self.home_dir = "/home/pi"
+        self.end_thread = False
+        self.rightFrame = None
+        self.leftFrame = None
+
+        self.wait_for_picture = False
 
     def start(self):
-        calibrate_camera(cam_num=0)
-        calibrate_camera(cam_num=1)
+        """
+        Start the application
+        """
+        print("Loading config...")
+        # TODO Load config
+        thread = threading.Thread(group=None, target=self.threaded_camera_stream, name="threaded_camera_stream")
+        print("Starting threaded_camera_stream")
+        thread.start()
+
+        while True:
+            print("Press 't' to take picture")
+            print("Press 'q' to quit")
+            var = input("> ")
+            if var == 'q':
+                print("Closing threads and quitting application...")
+                self.end_thread = True
+                break
+            if var == 't':
+                self.wait_for_picture = True
+                while True:
+                    if self.wait_for_picture == False:
+                        break
+                    time.sleep(0.1)
+
+                timestamp = time.time()
+
+                jpg_image_r = Image.fromarray(self.rightFrame)
+                jpg_image_l = Image.fromarray(self.leftFrame)
+
+                jpg_image_r = jpg_image_r.convert('RGB')
+                jpg_image_l = jpg_image_l.convert('RGB')
+
+                print("Saving photo to disk: '/home/pi/RPi-tankbot/local/frames/camera_{}_right.jpg'".format(timestamp))
+                jpg_image_r.save("/home/pi/RPi-tankbot/local/frames/camera_{}_right.jpg".format(timestamp), format='JPEG')
+
+                print("Saving photo '/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg' to disk".format(timestamp))
+                jpg_image_l.save("/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg".format(timestamp), format='JPEG')
+
+                # I want to
+                print("Calibrating left camera...")
+                self.calibrate_camera(cam_num=0, res_x=640, res_y=480)
+                print("Calibrating right camera...")
+                self.calibrate_camera(cam_num=1, res_x=640, res_y=480)
+                print("Calibrating stereo camera pair...")
+                self.calibrate_stereo_cameras(res_x=640, res_y=480)
+                continue
+
         return False
-        
+
+    def threaded_camera_stream():
+        res_x = 640
+        res_y = 480
+
+        right = cv2.VideoCapture(1)
+        right.set(cv2.CAP_PROP_FRAME_WIDTH, res_x)
+        right.set(cv2.CAP_PROP_FRAME_HEIGHT, res_y)
+        right.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+
+        left = cv2.VideoCapture(0)
+        left.set(cv2.CAP_PROP_FRAME_WIDTH, res_x)
+        left.set(cv2.CAP_PROP_FRAME_HEIGHT, res_y)
+        left.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+
+        # First start the camera stream thread
+        while True:
+            if self.end_thread == False:
+                print("Stopping threaded_camera_stream")
+                break
+            ret_left = right.grab()
+            ret_right = left.grab()
+            _, self.rightFrame = right.retrieve()
+            _, self.leftFrame = left.retrieve()
+            self.wait_for_picture = False
+
+
+            combined_image = np.concatenate(self.leftFrame, self.rightFrame), axis=1)
+            cv2.imshow('combined_image', combined_image)
+
+        right.release()
+        left.release()
+        return False
+
+
     def calibrate_stereo_cameras(self, res_x=640, res_y=480):
         # We need a lot of variables to calibrate the stereo camera
         """
@@ -118,7 +207,8 @@ class Calibration():
         processing_time = (processing_time02 - processing_time01)/ cv2.getTickFrequency()
         return processing_time
 
-    def calibrate_camera(cam_num=0, save_chessboard=False, res_x=640, res_y=480):
+
+    def calibrate_camera(self, cam_num=0, res_x=640, res_y=480):
         """
         cam_num 0 is left and 1 is right.
 
@@ -128,8 +218,8 @@ class Calibration():
         https://medium.com/@kennethjiang/calibrate-fisheye-lens-using-opencv-333b05afa0b0
         """
         # Arrays to store object points and image points from all the images.
+        processing_time01 = cv2.getTickCount()
         right_or_left = ["_right" if cam_num==1 else "_left"][0]
-        home_dir = r"C:\Users\kurtw\Documents\raspberry pi\Local Test Code"
         CHECKERBOARD = (6,9)
 
         subpix_criteria = (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 30, 0.1)
@@ -146,92 +236,70 @@ class Calibration():
         if the file exists, then load it
         If the file doesn't exist, then calibrate the cameras and save result to file
         """
-        images = glob.glob('{}/calibration_frames/{}p/*{}.jpg'.format(home_dir, res_y, right_or_left))
-        calbrate_cameras = None
 
-        try:
-            npz_file = np.load('{}/calibration_data/{}p/camera_calibration{}.npz'.format(home_dir, res_y, right_or_left))
-            if 'map1' and 'map2' in npz_file.files:
-                print("Camera calibration data has been found in cache.")
-                map1 = npz_file['map1']
-                map2 = npz_file['map2']
-                calbrate_cameras = True
+        images = glob.glob('{}/RPi-tankbot/local/frames/camera_*{}.jpg'.format(self.home_dir, right_or_left))
+
+        print("Calibrating '{}' camera...".format(right_or_left[1:]))
+        objpoints = [] # 3d point in real world space
+        imgpoints = [] # 2d points in image plane.
+
+        for index, file_name in enumerate(images):
+            print(index, file_name)
+            img = cv2.imread(file_name)
+            if _img_shape == None:
+                _img_shape = img.shape[:2]
             else:
-                print("Camera data file found but data corrupted.")
-                calbrate_cameras = True
-        except:
-            # If the file doesn't exist
-            print("Camera calibration data not found in cache.")
-            calbrate_cameras = True
+                assert _img_shape == img.shape[:2], "All images must share the same size."
 
-        if calbrate_cameras == True:
-            objpoints = [] # 3d point in real world space
-            imgpoints = [] # 2d points in image plane.
+            gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
-            for index, file_name in enumerate(images):
-                #print(index, file_name)
-                img = cv2.imread(file_name)
-                if _img_shape == None:
-                    _img_shape = img.shape[:2]
-                else:
-                    assert _img_shape == img.shape[:2], "All images must share the same size."
+            # Find the chess board corners
+            ret, corners = cv2.findChessboardCorners(gray, CHECKERBOARD, cv2.CALIB_CB_ADAPTIVE_THRESH+cv2.CALIB_CB_FAST_CHECK+cv2.CALIB_CB_NORMALIZE_IMAGE)
 
-                gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+            # If found, add object points, image points (after refining them)
+            if ret == True:
+                objpoints.append(objp)
+                cv2.cornerSubPix(gray,corners,(3,3),(-1,-1),subpix_criteria)
+                imgpoints.append(corners)
+            else:
+                print("Error! couldn't find chessboard corner in below file!!")
+                print(file_name)
+                print("Removing file '{}'".format(file_name))
+                os.remove(file_name)
 
-                # Find the chess board corners
-                ret, corners = cv2.findChessboardCorners(gray, CHECKERBOARD, cv2.CALIB_CB_ADAPTIVE_THRESH+cv2.CALIB_CB_FAST_CHECK+cv2.CALIB_CB_NORMALIZE_IMAGE)
+        # Opencv sample code uses the var 'grey' from the last opened picture
+        N_OK = len(objpoints)
+        DIM= (res_x, res_y)
+        K = np.zeros((3, 3))
+        D = np.zeros((4, 1))
+        rvecs = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(N_OK)]
+        tvecs = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(N_OK)]
 
+        rms, camera_matrix, distortion_coeff, _, _ = \
+            cv2.fisheye.calibrate(
+                objpoints,
+                imgpoints,
+                gray.shape[::-1],
+                K,
+                D,
+                rvecs,
+                tvecs,
+                calibration_flags,
+                (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6)
+            )
 
-                # If found, add object points, image points (after refining them)
-                if ret == True:
-                    objpoints.append(objp)
-                    cv2.cornerSubPix(gray,corners,(3,3),(-1,-1),subpix_criteria)
-                    imgpoints.append(corners)
-                else:
-                    print("Error! couldn't find chessboard corner in below file!!")
-                    print(file_name)
+        print("Root Means Squared:", rms)
 
-            # Opencv sample code uses the var 'grey' from the last opened picture
-            # I'm going to choose one at random
-            #file_name = random.sample(images, 1)[0]
-            #img = cv2.imread(file_name)
-            #gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-
-            N_OK = len(objpoints)
-            DIM= (res_x, res_y)
-            # I can get a larger field of view if I increase the DIM
-            K = np.zeros((3, 3))
-            D = np.zeros((4, 1))
-            rvecs = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(N_OK)]
-            tvecs = [np.zeros((1, 1, 3), dtype=np.float64) for i in range(N_OK)]
-
-            rms, camera_matrix, distortion_coeff, _, _ = \
-                cv2.fisheye.calibrate(
-                    objpoints,
-                    imgpoints,
-                    gray.shape[::-1],
-                    K,
-                    D,
-                    rvecs,
-                    tvecs,
-                    calibration_flags,
-                    (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-6)
-                )
-
-            print("Root Means Squared:", rms)
-
-            map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), K, DIM, cv2.CV_16SC2)
-            np.savez('{}/calibration_data/{}p/camera_calibration{}.npz'.format(home_dir,  res_y, right_or_left),
-                map1=map1, map2=map2, objpoints=objpoints, imgpoints=imgpoints,
-                camera_matrix=camera_matrix, distortion_coeff=distortion_coeff)
+        map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), K, DIM, cv2.CV_16SC2)
+        np.savez('{}/calibration_data/{}p/camera_calibration{}.npz'.format(self.home_dir,  res_y, right_or_left),
+            map1=map1, map2=map2, objpoints=objpoints, imgpoints=imgpoints,
+            camera_matrix=camera_matrix, distortion_coeff=distortion_coeff)
 
         # Starting from here if cache is found...
-        img = cv2.imread('{}/input_output/{}p/input{}.jpg'.format(home_dir, res_y, right_or_left))
-        h,  w = img.shape[:2]
-        #newcameramtx, roi=cv2.getOptimalNewCameraMatrix(mtx,dist,(w,h),1,(w,h))
+        processing_time02 = cv2.getTickCount()
+        processing_time = (processing_time02 - processing_time01)/ cv2.getTickFrequency()
+        return processing_time
 
-        undistorted_img = cv2.remap(img, map1, map2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
 
-        cv2.imwrite('{}/input_output/{}p/output{}.jpg'.format(home_dir, res_y, right_or_left), np.hstack((img, undistorted_img)))
-
-        return True
+if __name__ == '__main__':
+    start()
