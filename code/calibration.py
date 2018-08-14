@@ -94,7 +94,7 @@ class Calibration():
             _, self.rightFrame = right.retrieve()
             _, self.leftFrame = left.retrieve()
             self.wait_for_picture = False
-            
+
             if ret_left == False:
                 print("Problem with left")
             if ret_right == False:
@@ -106,7 +106,11 @@ class Calibration():
             imgRGB_combined = np.concatenate((imgRGB_left, imgRGB_right), axis=1)
             #jpg_image = Image.fromarray(imgRGB_combined)
 
+            # TODO: Current problem is that the image does not show properly
+            # when tested.
             cv2.imshow('combined_image', imgRGB_combined)
+            cv2.imshow('imgRGB_left', imgRGB_left)
+            cv2.imshow('imgRGB_right', imgRGB_right)
 
         right.release()
         left.release()
