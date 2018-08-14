@@ -54,7 +54,7 @@ class Calibration():
                 print("Saving photo to disk: '/home/pi/RPi-tankbot/local/frames/camera_{}_right.jpg'".format(timestamp))
                 jpg_image_r.save("/home/pi/RPi-tankbot/local/frames/camera_{}_right.jpg".format(timestamp), format='JPEG')
 
-                print("Saving photo '/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg' to disk".format(timestamp))
+                print("Saving photo to disk: '/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg' to disk".format(timestamp))
                 jpg_image_l.save("/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg".format(timestamp), format='JPEG')
 
                 # I want to
@@ -102,17 +102,15 @@ class Calibration():
             if ret_right == False:
                 print("Problem with right")
 
-
-            imgRGB_right=cv2.cvtColor(self.rightFrame,cv2.COLOR_BGR2RGB)
-            imgRGB_left=cv2.cvtColor(self.leftFrame,cv2.COLOR_BGR2RGB)
+            imgRGB_right=cv2.cvtColor(self.rightFrame, cv2.COLOR_BGR2RGB)
+            imgRGB_left=cv2.cvtColor(self.leftFrame, cv2.COLOR_BGR2RGB)
             imgRGB_combined = np.concatenate((imgRGB_left, imgRGB_right), axis=1)
             #jpg_image = Image.fromarray(imgRGB_combined)
 
             # TODO: Current problem is that the image does not show properly
             # when tested.
             cv2.imshow('combined_image', imgRGB_combined)
-            cv2.imshow('imgRGB_left', imgRGB_left)
-            cv2.imshow('imgRGB_right', imgRGB_right)
+            cv2.waitKey()
 
         right.release()
         left.release()
