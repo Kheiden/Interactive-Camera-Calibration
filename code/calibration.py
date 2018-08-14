@@ -1,3 +1,4 @@
+import threading
 import time
 import glob
 import cv2
@@ -20,7 +21,8 @@ class Calibration():
         """
         print("Loading config...")
         # TODO Load config
-        thread = threading.Thread(group=None, target=self.threaded_camera_stream, name="threaded_camera_stream")
+        import threadingthread = 
+        .Thread(group=None, target=self.threaded_camera_stream, name="threaded_camera_stream")
         print("Starting threaded_camera_stream")
         thread.start()
 
