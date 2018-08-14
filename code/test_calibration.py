@@ -11,7 +11,7 @@ class TestCalibration():
     def teardown_class(self):
         pass
 
-    #@pytest.mark.skip(reason="Not Yet Passed.")
+    @pytest.mark.skip(reason="Passed.")
     def test_start(self):
         output = self.c.start()
         assert output is True
