@@ -203,6 +203,10 @@ class Calibration():
         leftImagePoints = np.asarray(leftImagePoints, dtype=np.float64)
         rightImagePoints = np.asarray(rightImagePoints, dtype=np.float64)
 
+        print(len(objectPoints), len(leftImagePoints), len(rightImagePoints))
+        print(objectPoints.shape, leftImagePoints.shape, rightImagePoints.shape)
+        print(objectPoints.dtype, leftImagePoints.dtype, rightImagePoints.dtype)
+
         try:
             (RMS, _, _, _, _, rotationMatrix, translationVector) = cv2.fisheye.stereoCalibrate(
                     objectPoints, leftImagePoints, rightImagePoints,
