@@ -3,7 +3,7 @@ import time
 import glob
 import cv2
 import os
-import np
+import numpy as np
 
 from PIL import Image
 
@@ -89,12 +89,16 @@ class Calibration():
                 break
             ret_left = right.grab()
             ret_right = left.grab()
-            print("Taking photo...")
+            #print("Taking photo...")
+            self.wait_for_picture = True
             _, self.rightFrame = right.retrieve()
             _, self.leftFrame = left.retrieve()
             self.wait_for_picture = False
 
-            combined_image = np.concatenate((self.leftFrame, self.rightFrame), axis=1)
+            imgRGB_right=cv2.cvtColor(self.rightFrame,cv2.COLOR_BGR2RGB)
+            imgRGB_left=cv2.cvtColor(self.leftFrame,cv2.COLOR_BGR2RGB)
+
+            combined_image = np.concatenate((imgRGB_left, imgRGB_right), axis=1)
             cv2.imshow('combined_image', combined_image)
 
         right.release()
