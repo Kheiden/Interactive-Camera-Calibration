@@ -90,7 +90,7 @@ class Calibration():
             self.wait_for_picture = False
 
 
-            combined_image = np.concatenate(self.leftFrame, self.rightFrame), axis=1)
+            combined_image = np.concatenate((self.leftFrame, self.rightFrame), axis=1)
             cv2.imshow('combined_image', combined_image)
 
         right.release()
