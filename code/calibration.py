@@ -60,11 +60,11 @@ class Calibration():
                 if ret_left == False:
                     print("No Chessboard Detected: Left")
                     print("Try Taking another photo")
-                    break
+                    continue
                 if ret_right == False:
                     print("No Chessboard Detected: Right")
                     print("Try Taking another photo")
-                    break
+                    continue
 
                 jpg_image_r = Image.fromarray(self.rightFrame)
                 jpg_image_l = Image.fromarray(self.leftFrame)
@@ -199,7 +199,7 @@ class Calibration():
                 list_of_vars = ['map1', 'map2', 'objpoints', 'imgpoints', 'camera_matrix', 'distortion_coeff']
 
                 if sorted(list_of_vars) == sorted(npz_file.files):
-                    print("{} camera calibration data has been found in cache.".format(right_or_left))
+                    print("{} camera calibration data has been found in cache.".format(right_or_left[1:]))
                     map1 = npz_file['map1']
                     map2 = npz_file['map2']
                     objectPoints = npz_file['objpoints']
