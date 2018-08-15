@@ -54,7 +54,7 @@ class Calibration():
                 print("Saving photo to disk: '/home/pi/RPi-tankbot/local/frames/camera_{}_right.jpg'".format(timestamp))
                 jpg_image_r.save("/home/pi/RPi-tankbot/local/frames/camera_{}_right.jpg".format(timestamp), format='JPEG')
 
-                print("Saving photo to disk: '/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg' to disk".format(timestamp))
+                print("Saving photo to disk: '/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg'".format(timestamp))
                 jpg_image_l.save("/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg".format(timestamp), format='JPEG')
 
                 while True:
@@ -66,18 +66,17 @@ class Calibration():
                     self.calibrate_camera(cam_num=1, res_x=640, res_y=480)
                     print("Calibrating stereo camera pair...")
 
-                    print("Re-attempting to calibrate stereo camera pair...")
                     output = self.calibrate_stereo_cameras(res_x=640, res_y=480)
                     if output != False:
                         break
                     #Remove last two images from glob
                     images = glob.glob('{}/RPi-tankbot/local/frames/camera_*.jpg'.format(self.home_dir))
-                    if len(images) == 0:
-                        print("Take more chessboard images.")
-                        break
                     for filename in images[-2:]:
                         print("Deleting file:", filename)
                         os.remove(filename)
+                    if len(images) == 0:
+                        print("Take more chessboard images.")
+                        break
                 continue
 
         return False
@@ -177,10 +176,9 @@ class Calibration():
                 npz_file = np.load('{}/calibration_data/{}p/camera_calibration{}.npz'.format(self.home_dir, res_y, right_or_left))
 
                 list_of_vars = ['map1', 'map2', 'objpoints', 'imgpoints', 'camera_matrix', 'distortion_coeff']
-                print(sorted(npz_file.files))
 
                 if sorted(list_of_vars) == sorted(npz_file.files):
-                    print("Camera calibration data has been found in cache.")
+                    print("{} camera calibration data has been found in cache.".format(right_or_left))
                     map1 = npz_file['map1']
                     map2 = npz_file['map2']
                     objectPoints = npz_file['objpoints']
@@ -285,7 +283,6 @@ class Calibration():
 
         images = glob.glob('{}/RPi-tankbot/local/frames/camera_*{}.jpg'.format(self.home_dir, right_or_left))
 
-        print("Calibrating '{}' camera...".format(right_or_left[1:]))
         objpoints = [] # 3d point in real world space
         imgpoints = [] # 2d points in image plane.
 
