@@ -16,6 +16,8 @@ class Calibration():
         self.rightFrame = None
         self.leftFrame = None
 
+        self.checkerboard = (6,9)
+
         self.wait_for_picture = False
 
     def start(self):
@@ -44,6 +46,25 @@ class Calibration():
                     time.sleep(0.1)
 
                 timestamp = time.time()
+
+
+                gray = cv2.cvtColor(self.rightFrame, cv2.COLOR_BGR2GRAY)
+                # Find the chess board corners
+                ret_right, _ = cv2.findChessboardCorners(gray, self.checkerboard, cv2.CALIB_CB_ADAPTIVE_THRESH+cv2.CALIB_CB_FAST_CHECK+cv2.CALIB_CB_NORMALIZE_IMAGE)
+
+                gray = cv2.cvtColor(self.leftFrame, cv2.COLOR_BGR2GRAY)
+                # Find the chess board corners
+                ret_left, _ = cv2.findChessboardCorners(gray, self.checkerboard, cv2.CALIB_CB_ADAPTIVE_THRESH+cv2.CALIB_CB_FAST_CHECK+cv2.CALIB_CB_NORMALIZE_IMAGE)
+
+
+                if ret_left == False:
+                    print("No Chessboard Detected: Left")
+                    print("Try Taking another photo")
+                    break
+                if ret_right == False:
+                    print("No Chessboard Detected: Right")
+                    print("Try Taking another photo")
+                    break
 
                 jpg_image_r = Image.fromarray(self.rightFrame)
                 jpg_image_l = Image.fromarray(self.leftFrame)
@@ -111,9 +132,9 @@ class Calibration():
             self.wait_for_picture = False
 
             if ret_left == False:
-                print("Problem with left")
+                print("Problem taking left photo")
             if ret_right == False:
-                print("Problem with right")
+                print("Problem taking right photo")
 
             #imgRGB_right=cv2.cvtColor(self.rightFrame, cv2.COLOR_BGR2RGB)
             #imgRGB_left=cv2.cvtColor(self.leftFrame, cv2.COLOR_BGR2RGB)
@@ -264,13 +285,13 @@ class Calibration():
         # Arrays to store object points and image points from all the images.
         processing_time01 = cv2.getTickCount()
         right_or_left = ["_right" if cam_num==1 else "_left"][0]
-        CHECKERBOARD = (6,9)
+
 
         subpix_criteria = (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER, 30, 0.1)
         calibration_flags = cv2.fisheye.CALIB_RECOMPUTE_EXTRINSIC+cv2.fisheye.CALIB_CHECK_COND+cv2.fisheye.CALIB_FIX_SKEW
 
-        objp = np.zeros( (CHECKERBOARD[0]*CHECKERBOARD[1], 1, 3) , np.float64)
-        objp[:,0, :2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
+        objp = np.zeros( (self.checkerboard[0]*self.checkerboard[1], 1, 3) , np.float64)
+        objp[:,0, :2] = np.mgrid[0:self.checkerboard[0], 0:self.checkerboard[1]].T.reshape(-1, 2)
 
         _img_shape = None
         objpoints = [] # 3d point in real world space
@@ -297,7 +318,7 @@ class Calibration():
             gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
             # Find the chess board corners
-            ret, corners = cv2.findChessboardCorners(gray, CHECKERBOARD, cv2.CALIB_CB_ADAPTIVE_THRESH+cv2.CALIB_CB_FAST_CHECK+cv2.CALIB_CB_NORMALIZE_IMAGE)
+            ret, corners = cv2.findChessboardCorners(gray, self.checkerboard, cv2.CALIB_CB_ADAPTIVE_THRESH+cv2.CALIB_CB_FAST_CHECK+cv2.CALIB_CB_NORMALIZE_IMAGE)
 
             # If found, add object points, image points (after refining them)
             if ret == True:
