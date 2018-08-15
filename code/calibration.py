@@ -238,8 +238,9 @@ class Calibration():
                     rightCameraMatrix, rightDistortionCoefficients,
                     imageSize, None, None,
                     cv2.CALIB_FIX_INTRINSIC, TERMINATION_CRITERIA)
-        except:
+        except Exception as e:
             # Unable to calibrate stereo pair.
+            print("Error calibrating stereo pair!", e)
             return False
 
         print("Root Means Squared:", RMS)
