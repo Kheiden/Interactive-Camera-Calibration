@@ -91,7 +91,7 @@ class Calibration():
                     if output != False:
                         break
                     #Remove last two images from glob
-                    images = glob.glob('{}/RPi-tankbot/local/frames/camera_*.jpg'.format(self.home_dir))
+                    images = sorted(glob.glob('{}/RPi-tankbot/local/frames/camera_*.jpg'.format(self.home_dir)))
                     print("This should be in order:")
                     for i in images:
                         print(i)
