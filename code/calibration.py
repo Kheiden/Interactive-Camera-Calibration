@@ -57,13 +57,15 @@ class Calibration():
                 print("Saving photo to disk: '/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg' to disk".format(timestamp))
                 jpg_image_l.save("/home/pi/RPi-tankbot/local/frames/camera_{}_left.jpg".format(timestamp), format='JPEG')
 
-                # I want to
-                print("Calibrating left camera...")
-                self.calibrate_camera(cam_num=0, res_x=640, res_y=480)
-                print("Calibrating right camera...")
-                self.calibrate_camera(cam_num=1, res_x=640, res_y=480)
-                print("Calibrating stereo camera pair...")
                 while True:
+                    # I want to calibrate the left and right cameras every time
+                    # I take a new stereo photo
+                    print("Calibrating left camera...")
+                    self.calibrate_camera(cam_num=0, res_x=640, res_y=480)
+                    print("Calibrating right camera...")
+                    self.calibrate_camera(cam_num=1, res_x=640, res_y=480)
+                    print("Calibrating stereo camera pair...")
+
                     print("Re-attempting to calibrate stereo camera pair...")
                     output = self.calibrate_stereo_cameras(res_x=640, res_y=480)
                     if output != False:
