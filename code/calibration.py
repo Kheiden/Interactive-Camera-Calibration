@@ -312,7 +312,7 @@ class Calibration():
         If the file doesn't exist, then calibrate the cameras and save result to file
         """
 
-        images = glob.glob('{}/RPi-tankbot/local/frames/camera_*{}.jpg'.format(self.home_dir, right_or_left))
+        images = sorted(glob.glob('{}/RPi-tankbot/local/frames/camera_*{}.jpg'.format(self.home_dir, right_or_left)))
 
         objpoints = [] # 3d point in real world space
         imgpoints = [] # 2d points in image plane.
