@@ -89,6 +89,10 @@ class Calibration():
 
                     output = self.calibrate_stereo_cameras(res_x=640, res_y=480)
                     if output != False:
+                        # This means that the left and right photos were successful in
+                        # calibrating the stereo camera pair with the other photos
+                        # TODO: Implement below code:
+                        # self.coverage_map(chessboard_coordinates)
                         break
                     #Remove last two images from glob
                     images = sorted(glob.glob('{}/RPi-tankbot/local/frames/camera_*.jpg'.format(self.home_dir)))
@@ -155,6 +159,7 @@ class Calibration():
 
         right.release()
         left.release()
+        cv2.destroyAllWindows()
         return False
 
 
