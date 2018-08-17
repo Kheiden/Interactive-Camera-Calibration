@@ -20,6 +20,10 @@ class Calibration():
 
         self.wait_for_picture = False
 
+    def current_num_photos(self):
+        total_images_right = len(glob.glob('{}/RPi-tankbot/local/frames/camera_*_right.jpg'.format(self.home_dir)))
+        return total_images_right
+
     def start(self):
         """
         Start the application
@@ -31,6 +35,7 @@ class Calibration():
         thread.start()
 
         while True:
+            print("Number of photos:", self.current_num_photos())
             print("Press 't' to take picture")
             print("Press 'q' to quit")
             var = input("> ")
@@ -46,8 +51,6 @@ class Calibration():
                     time.sleep(0.1)
 
                 timestamp = time.time()
-
-
                 gray = cv2.cvtColor(self.rightFrame, cv2.COLOR_BGR2GRAY)
                 # Find the chess board corners
                 ret_right, _ = cv2.findChessboardCorners(gray, self.checkerboard, cv2.CALIB_CB_ADAPTIVE_THRESH+cv2.CALIB_CB_FAST_CHECK+cv2.CALIB_CB_NORMALIZE_IMAGE)
@@ -99,8 +102,8 @@ class Calibration():
                     #print("This should be in order:")
                     #for i in images:
                     #    print(i)
+                    print("Deleting most recent stereo photo pair.)
                     for filename in images[-2:]:
-                        #print("Deleting file:", filename)
                         os.remove(filename)
 
                     if len(images) == 0:
@@ -246,7 +249,7 @@ class Calibration():
                     cv2.CALIB_FIX_INTRINSIC, TERMINATION_CRITERIA)
         except Exception as e:
             # Unable to calibrate stereo pair.
-            print("Error calibrating stereo pair!", e)
+            print("There was a problem calibrating the Stereo Pair.")
             return False
 
         print("Root Means Squared:", RMS)
@@ -313,12 +316,12 @@ class Calibration():
         """
 
         images = sorted(glob.glob('{}/RPi-tankbot/local/frames/camera_*{}.jpg'.format(self.home_dir, right_or_left)))
+        print("Found {} images to be used to calibrate {} camera".format(len(images), right_or_left))
 
         objpoints = [] # 3d point in real world space
         imgpoints = [] # 2d points in image plane.
 
         for index, file_name in enumerate(images):
-            print(index, file_name)
             img = cv2.imread(file_name)
             if _img_shape == None:
                 _img_shape = img.shape[:2]
@@ -367,7 +370,7 @@ class Calibration():
             processing_time02 = cv2.getTickCount()
             processing_time = (processing_time02 - processing_time01)/ cv2.getTickFrequency()
             return processing_time
-        print("Root Means Squared:", rms)
+        print("Root Means Squared: {} Goal RMS: 0 < rms < 1.0".format(round(rms, 4)))
 
         map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), K, DIM, cv2.CV_16SC2)
         np.savez('{}/calibration_data/{}p/camera_calibration{}.npz'.format(self.home_dir,  res_y, right_or_left),
