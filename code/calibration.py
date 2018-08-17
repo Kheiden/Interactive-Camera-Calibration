@@ -252,7 +252,7 @@ class Calibration():
             print("There was a problem calibrating the Stereo Pair.")
             return False
 
-        print("Root Means Squared: {} Goal RMS: 0 < rms < 1.0".format(round(rms, 4)))
+        print("Root Means Squared: {} Goal rms: 0 < rms < 1.0".format(round(rms, 4)))
         test_result = ["PASSED" if rms < 1 else "FAILED"]
         print(test_result)
 
@@ -373,7 +373,7 @@ class Calibration():
             processing_time02 = cv2.getTickCount()
             processing_time = (processing_time02 - processing_time01)/ cv2.getTickFrequency()
             return processing_time
-        print("Root Means Squared: {} Goal RMS: 0 < rms < 1.0".format(round(rms, 4)))
+        print("Root Means Squared: {} Goal rms: 0 < rms < 1.0".format(round(rms, 4)))
         test_result = ["PASSED" if rms < 1 else "FAILED"]
         print(test_result)
 
