@@ -96,12 +96,13 @@ class Calibration():
                         break
                     #Remove last two images from glob
                     images = sorted(glob.glob('{}/RPi-tankbot/local/frames/camera_*.jpg'.format(self.home_dir)))
-                    print("This should be in order:")
-                    for i in images:
-                        print(i)
+                    #print("This should be in order:")
+                    #for i in images:
+                    #    print(i)
                     for filename in images[-2:]:
                         print("Deleting file:", filename)
                         os.remove(filename)
+                        break
                     if len(images) == 0:
                         print("Take more chessboard images.")
                         break
