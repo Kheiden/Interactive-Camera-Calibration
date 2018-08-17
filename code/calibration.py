@@ -241,7 +241,7 @@ class Calibration():
         print(objectPoints.dtype, leftImagePoints.dtype, rightImagePoints.dtype)
 
         try:
-            (RMS, _, _, _, _, rotationMatrix, translationVector) = cv2.fisheye.stereoCalibrate(
+            (rms, _, _, _, _, rotationMatrix, translationVector) = cv2.fisheye.stereoCalibrate(
                     objectPoints, leftImagePoints, rightImagePoints,
                     leftCameraMatrix, leftDistortionCoefficients,
                     rightCameraMatrix, rightDistortionCoefficients,
@@ -252,7 +252,10 @@ class Calibration():
             print("There was a problem calibrating the Stereo Pair.")
             return False
 
-        print("Root Means Squared:", RMS)
+        print("Root Means Squared: {} Goal RMS: 0 < rms < 1.0".format(round(rms, 4)))
+        test_result = ["PASSED" if rms < 1 else "FAILED"]
+        print(test_result)
+
 
         print("Rectifying cameras...")
         R1 = np.zeros([3,3])
@@ -316,7 +319,7 @@ class Calibration():
         """
 
         images = sorted(glob.glob('{}/RPi-tankbot/local/frames/camera_*{}.jpg'.format(self.home_dir, right_or_left)))
-        print("Found {} images to be used to calibrate {} camera".format(len(images), right_or_left))
+        print("Found {} images to be used to calibrate {} camera".format(len(images), right_or_left[1:]))
 
         objpoints = [] # 3d point in real world space
         imgpoints = [] # 2d points in image plane.
@@ -371,6 +374,8 @@ class Calibration():
             processing_time = (processing_time02 - processing_time01)/ cv2.getTickFrequency()
             return processing_time
         print("Root Means Squared: {} Goal RMS: 0 < rms < 1.0".format(round(rms, 4)))
+        test_result = ["PASSED" if rms < 1 else "FAILED"]
+        print(test_result)
 
         map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), K, DIM, cv2.CV_16SC2)
         np.savez('{}/calibration_data/{}p/camera_calibration{}.npz'.format(self.home_dir,  res_y, right_or_left),
