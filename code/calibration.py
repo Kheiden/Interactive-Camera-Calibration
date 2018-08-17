@@ -100,9 +100,10 @@ class Calibration():
                     #for i in images:
                     #    print(i)
                     for filename in images[-2:]:
-                        print("Deleting file:", filename)
+                        #print("Deleting file:", filename)
                         os.remove(filename)
                         break
+
                     if len(images) == 0:
                         print("Take more chessboard images.")
                         break
