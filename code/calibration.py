@@ -102,7 +102,7 @@ class Calibration():
                     #print("This should be in order:")
                     #for i in images:
                     #    print(i)
-                    print("Deleting most recent stereo photo pair.)
+                    print("Deleting most recent stereo photo pair.")
                     for filename in images[-2:]:
                         os.remove(filename)
 
